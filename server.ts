@@ -3,9 +3,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createServer as createViteServer } from 'vite';
 import {
+  CURRICULUM_VERSION,
   DEFAULT_GROUPS,
   DEFAULT_SETTINGS,
   DEFAULT_VOCAB,
+  GROUP_IDS,
 } from './src/data/curriculum.ts';
 import type {
   ClassroomState,
@@ -21,9 +23,9 @@ const STATE_FILE = path.resolve(process.cwd(), '.classroom-state.json');
 
 function createInitialTeams(): Record<number, TeamProgress> {
   const teams: Record<number, TeamProgress> = {};
-  for (let i = 1; i <= 8; i++) {
-    teams[i] = {
-      groupId: i,
+  for (const id of GROUP_IDS) {
+    teams[id] = {
+      groupId: id,
       status: 'IDLE',
       currentQ: 0,
       totalQ: 3,
@@ -40,6 +42,7 @@ function createInitialTeams(): Record<number, TeamProgress> {
 
 function createDefaultState(): ClassroomState {
   return {
+    curriculumVersion: CURRICULUM_VERSION,
     settings: { ...DEFAULT_SETTINGS },
     vocab: DEFAULT_VOCAB.map((v) => ({ ...v })),
     groups: DEFAULT_GROUPS.map((g) => ({
@@ -60,8 +63,12 @@ function loadState(): ClassroomState {
     if (fs.existsSync(STATE_FILE)) {
       const raw = fs.readFileSync(STATE_FILE, 'utf-8');
       const parsed = JSON.parse(raw) as Partial<ClassroomState>;
+      if (parsed.curriculumVersion !== CURRICULUM_VERSION) {
+        return createDefaultState();
+      }
       const base = createDefaultState();
       return {
+        curriculumVersion: CURRICULUM_VERSION,
         settings: { ...base.settings, ...(parsed.settings ?? {}) },
         vocab: Array.isArray(parsed.vocab) && parsed.vocab.length > 0 ? parsed.vocab : base.vocab,
         groups: Array.isArray(parsed.groups) && parsed.groups.length > 0 ? parsed.groups : base.groups,
@@ -140,7 +147,7 @@ async function startServer() {
     };
 
     const groupId = Number(body.groupId);
-    if (!Number.isInteger(groupId) || groupId < 1 || groupId > 8) {
+    if (!Number.isInteger(groupId) || !(GROUP_IDS as readonly number[]).includes(groupId)) {
       res.status(400).json({ error: 'Invalid groupId' });
       return;
     }
@@ -196,10 +203,10 @@ async function startServer() {
 
     const now = Date.now();
     // Reset finished or idle teams cleanly for synchronized round if requested
-    for (let i = 1; i <= 8; i++) {
-      const team = state.session.teams[i];
+    for (const id of GROUP_IDS) {
+      const team = state.session.teams[id];
       if (team && team.status === 'FINISHED') {
-        state.session.teams[i] = {
+        state.session.teams[id] = {
           ...team,
           status: 'READY',
           currentQ: 0,
@@ -301,7 +308,7 @@ async function startServer() {
     if (Array.isArray(body.vocab) && body.vocab.length > 0) {
       state.vocab = body.vocab;
     }
-    if (Array.isArray(body.groups) && body.groups.length === 8) {
+    if (Array.isArray(body.groups) && body.groups.length === GROUP_IDS.length) {
       state.groups = body.groups;
     }
     broadcastState();

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Check, Plus, RotateCcw, Save, Trash2 } from 'lucide-react';
+import { GROUP_IDS } from '../data/curriculum.ts';
 import type {
   ClassroomState,
   GameSettings,
@@ -28,7 +29,7 @@ export function TeacherSettingsView({
   const [settingsForm, setSettingsForm] = useState<GameSettings>(state.settings);
   const [vocabDraft, setVocabDraft] = useState<VocabItem[]>(state.vocab);
   const [groupsDraft, setGroupsDraft] = useState<GroupDeck[]>(state.groups);
-  const [activeGroupId, setActiveGroupId] = useState<number>(1);
+  const [activeGroupId, setActiveGroupId] = useState<number>(GROUP_IDS[0]);
   const [editorTab, setEditorTab] = useState<'rules' | 'vocab' | 'questions'>('rules');
   const [savedNotice, setSavedNotice] = useState<string | null>(null);
 
@@ -55,7 +56,7 @@ export function TeacherSettingsView({
 
   const handleResetDefaults = async () => {
     await onUpdateContent({ resetToDefaults: true });
-    showNotice('คืนค่าคำศัพท์และโจทย์ต้นฉบับทั้ง 8 กลุ่มแล้ว');
+    showNotice('คืนค่าคำศัพท์และโจทย์ต้นฉบับกลุ่ม 3–9 แล้ว');
   };
 
   const updateVocabField = (
@@ -156,7 +157,7 @@ export function TeacherSettingsView({
             [
               { id: 'rules', label: 'กติกาและเวลา' },
               { id: 'vocab', label: 'การ์ดคำศัพท์' },
-              { id: 'questions', label: 'โจทย์ 8 กลุ่ม' },
+              { id: 'questions', label: 'โจทย์กลุ่ม 3–9' },
             ] as const
           ).map((tab) => (
             <button

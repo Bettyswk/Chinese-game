@@ -53,6 +53,7 @@ export interface ClassroomSession {
 }
 
 export interface ClassroomState {
+  curriculumVersion?: number;
   settings: GameSettings;
   vocab: VocabItem[];
   groups: GroupDeck[];

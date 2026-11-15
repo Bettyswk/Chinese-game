@@ -91,7 +91,7 @@ export function LeaderboardView({
             {connected ? 'ซิงก์ข้อมูลเรียลไทม์' : 'กำลังเชื่อมต่อเซิร์ฟเวอร์...'}
           </p>
           <h1 className="mt-1.5 text-2xl font-bold tracking-tight text-[#14201B] sm:text-3xl dark:text-[#ECF1EE]">
-            ตารางคะแนนสด 8 กลุ่ม — 《入住速递》
+            ตารางคะแนนสด 7 กลุ่ม (กลุ่ม 3–9) — 《入住速递》
           </h1>
           <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[#54665E] dark:text-[#9CB0A6]">
             <span>คำตะโกนจบเกม: <strong className="font-cn text-[#0F3D2E] dark:text-[#D4AF67]">{state.settings.shoutWord}</strong></span>

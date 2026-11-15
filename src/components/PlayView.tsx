@@ -7,6 +7,7 @@ import {
   BellOff,
   CheckCircle2,
   KeyRound,
+  Lightbulb,
   Lock,
   RotateCcw,
   Volume2,
@@ -136,15 +137,18 @@ export function PlayView({
     };
   }, []);
 
-  // Re-shuffle vocabulary cards whenever question changes
+  const vocabRef = useRef(state.vocab);
+  vocabRef.current = state.vocab;
+
+  // Re-shuffle vocabulary cards only when entering PLAYING or advancing to a new question
   useEffect(() => {
     if (stage === 'PLAYING') {
-      setShuffledVocab(shuffleArray(state.vocab));
+      setShuffledVocab(shuffleArray(vocabRef.current));
       setWrongIds([]);
       setSolvedVocab(null);
       setShakeId(null);
     }
-  }, [stage, questionIdx, state.vocab]);
+  }, [stage, questionIdx]);
 
   // Stopwatch loop while playing
   useEffect(() => {
@@ -397,7 +401,7 @@ export function PlayView({
                 · เช็คอินด่วนทันใจ
               </h1>
               <p className="mt-3 max-w-2xl text-base leading-relaxed text-[#3B4B44] dark:text-[#CBD5D0]">
-                เกมแข่งขันภาษาจีนธุรกิจงานบริการโรงแรมสำหรับ 8 กลุ่ม ช่วยกันอ่านโจทย์และเลือกการ์ดคำศัพท์ 10 ใบมาเติมให้ครบ 3 ข้อเร็วที่สุด
+                เกมแข่งขันภาษาจีนธุรกิจงานบริการโรงแรมสำหรับ 7 กลุ่ม (กลุ่ม 3–9) ช่วยกันอ่านโจทย์และเลือกการ์ดคำศัพท์ 10 ใบมาเติมให้ครบ 3 ข้อเร็วที่สุด
               </p>
 
               <div className="mt-6 grid grid-cols-1 gap-4 border-t border-[#D6DBD4] pt-5 sm:grid-cols-3 dark:border-[#233B32]">
@@ -406,7 +410,7 @@ export function PlayView({
                     01. เตรียมพร้อม
                   </p>
                   <p className="mt-1 text-sm text-[#3B4B44] dark:text-[#CBD5D0]">
-                    เลือกหมายเลขกลุ่ม 1–8 แล้วรอสัญญาณ <span className="font-cn font-semibold">开始</span> พร้อมกัน
+                    เลือกหมายเลขกลุ่ม 3–9 แล้วรอสัญญาณ <span className="font-cn font-semibold">开始</span> พร้อมกัน
                   </p>
                 </div>
                 <div>
@@ -481,7 +485,7 @@ export function PlayView({
         <div ref={groupGridRef} className="mt-10 border-t border-[#D6DBD4] pt-8 dark:border-[#233B32]">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
             <h2 className="text-xl font-bold text-[#14201B] dark:text-[#ECF1EE]">
-              เลือกหมายเลขกลุ่มของคุณ (กลุ่ม 1 – 8)
+              เลือกหมายเลขกลุ่มของคุณ (กลุ่ม 3 – 9)
             </h2>
             <p className="text-xs text-[#54665E] dark:text-[#9CB0A6]">
               แต่ละกลุ่มใช้ 1 อุปกรณ์ร่วมกัน · โจทย์ชุดเฉพาะกลุ่มไม่ซ้ำกัน
@@ -624,6 +628,7 @@ export function PlayView({
     const isLocked = lockRemainingMs > 0;
     const isSolved = solvedVocab !== null;
     const penaltyMs = wrongCount * state.settings.penaltySeconds * 1000;
+    const showThaiHint = !isSolved && wrongIds.length >= 3;
 
     return (
       <section className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
@@ -721,6 +726,23 @@ export function PlayView({
               )}
             </p>
           </div>
+
+          {showThaiHint && (
+            <div className="mt-4 flex items-start gap-2.5 rounded-lg border border-[#B08D57] bg-[#FEF3C7]/85 px-4 py-3 text-[#78350F] dark:border-[#D4AF67] dark:bg-[#2A200D] dark:text-[#FDE68A]">
+              <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-[#B08D57] dark:text-[#D4AF67]" />
+              <div className="text-sm">
+                <span className="font-bold">คำใบ้ภาษาไทย (ผิด {wrongIds.length} ครั้ง): </span>
+                <span>{currentQuestion.contextHint || `หมวด: ${currentQuestion.sessionTh}`}</span>
+              </div>
+            </div>
+          )}
+
+          {!isSolved && wrongIds.length === 2 && (
+            <div className="mt-3 flex items-center gap-2 text-xs font-medium text-[#B08D57] dark:text-[#D4AF67]">
+              <Lightbulb className="h-3.5 w-3.5 shrink-0" />
+              <span>ตอบผิดข้อนี้ 2 ครั้งแล้ว · หากตอบผิดครั้งที่ 3 จะแสดงคำใบ้ภาษาไทย</span>
+            </div>
+          )}
 
           {ttsNotice && (
             <p className="mt-3 text-xs text-[#D97706] dark:text-[#FBBF24]">

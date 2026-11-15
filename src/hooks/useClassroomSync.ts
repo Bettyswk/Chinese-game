@@ -3,6 +3,7 @@ import {
   DEFAULT_GROUPS,
   DEFAULT_SETTINGS,
   DEFAULT_VOCAB,
+  GROUP_IDS,
 } from '../data/curriculum.ts';
 import type {
   ClassroomState,
@@ -15,9 +16,9 @@ import type {
 
 function buildFallbackTeams(): Record<number, TeamProgress> {
   const teams: Record<number, TeamProgress> = {};
-  for (let i = 1; i <= 8; i++) {
-    teams[i] = {
-      groupId: i,
+  for (const id of GROUP_IDS) {
+    teams[id] = {
+      groupId: id,
       status: 'IDLE',
       currentQ: 0,
       totalQ: 3,
@@ -68,7 +69,21 @@ export function useClassroomSync() {
       if (!active) return;
       try {
         const parsed = JSON.parse(event.data) as ClassroomState;
-        setState(parsed);
+        setState((prev) => ({
+          ...parsed,
+          settings:
+            JSON.stringify(prev.settings) === JSON.stringify(parsed.settings)
+              ? prev.settings
+              : parsed.settings,
+          vocab:
+            JSON.stringify(prev.vocab) === JSON.stringify(parsed.vocab)
+              ? prev.vocab
+              : parsed.vocab,
+          groups:
+            JSON.stringify(prev.groups) === JSON.stringify(parsed.groups)
+              ? prev.groups
+              : parsed.groups,
+        }));
         setConnected(true);
       } catch {
         // Ignore malformed SSE frame
