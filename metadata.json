@@ -1,0 +1,6 @@
+{
+  "name": "入住速递 · เช็คอินด่วนทันใจ",
+  "description": "เกมแข่งขันภาษาจีนธุรกิจงานบริการโรงแรม บทที่ 2 งานต้อนรับส่วนหน้า สำหรับห้องเรียนภาษาไทย พร้อมกระดานอันดับกลางแบบเรียลไทม์",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
